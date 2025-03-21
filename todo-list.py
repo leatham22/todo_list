@@ -17,7 +17,11 @@ def writing_file(filename, alist):
             filelist.write("{}\n".format(task))
 
 
+def exit_to_menu(user_input):
+    if user_input.lower() == "exit":
+        return True
 
+        
 
 def welcome():
     print("\nWhat would you like to do?")
@@ -30,7 +34,8 @@ def welcome():
 
 def add_task(alist):
     new_task = str(input("What task would you like to add (type \"exit\" to return to menu): "))
-    if new_task == "exit":
+    if exit_to_menu(new_task):
+        print("returning to menu .....")
         return
     else:
         alist.append(new_task)
@@ -61,7 +66,7 @@ def remove_task(alist):
     while True:
         try:
             removed = input("Which task would you like to remove? Please enter index number (type \"exit\" to return to menu): ")
-            if removed == "exit":
+            if exit_to_menu(removed):
                 return
             else:
                 removed = int(removed)
@@ -81,7 +86,7 @@ def complete_task(alist, clist):
     while True:
         try:
             removed = input("Which task would you like to complete? Please enter index number (type \"exit\" to return to menu): ")
-            if removed == "exit":
+            if exit_to_menu(removed):
                 return
             else:
                 removed = int(removed)
