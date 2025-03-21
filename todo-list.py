@@ -1,3 +1,5 @@
+import csv
+counter = 0
 
 def reading_file(filename):
     try:
@@ -25,6 +27,7 @@ def exit_to_menu(user_input):
 
 def welcome():
     print("\nWhat would you like to do?")
+    print("Undo last action? (enter: 0)")
     print("Add Task? (enter: 1)")
     print("View Tasks? (enter: 2)")
     print("Complete task? (enter: 3)")
@@ -33,6 +36,7 @@ def welcome():
     print("Exit? (enter: 6) \n ")
 
 def add_task(alist):
+    global counter
     new_task = str(input("What task would you like to add (type \"exit\" to return to menu): "))
     if exit_to_menu(new_task):
         print("returning to menu .....")
@@ -41,6 +45,7 @@ def add_task(alist):
         alist.append(new_task)
         index = len(alist) - 1
         print("The task is located at the following index: {}  \n".format(index))
+        counter = 1
         return alist
 
 def view_current_tasks(alist):
@@ -59,7 +64,8 @@ def view_completed_tasks(alist):
     for task in alist:
             print("Task completed: {}".format(task))
 
-def remove_task(alist):
+def remove_task(alist, blist):
+    global counter
     if view_current_tasks(alist) is False:
         print("No Tasks to return, returning you to menu \n ......")
         return
@@ -70,9 +76,12 @@ def remove_task(alist):
                 return
             else:
                 removed = int(removed)
-                alist.pop(removed)
+                removed_item = alist.pop(removed)
+                blist.append(removed_item)
+                print(blist)
                 print("\n Task removed from current tasks.")
                 view_current_tasks(alist)
+                counter = 2
                 return alist
         except ValueError:
             print("Please input a valid integar representing a Task index or exit \n")
@@ -80,6 +89,7 @@ def remove_task(alist):
             print("Please input a valid integar representing a Task Index or exit \n")
 
 def complete_task(alist, clist):
+    global counter
     if view_current_tasks(alist) is False:
         print("No Tasks to complete, returning you to menu \n ......")
         return
@@ -89,34 +99,63 @@ def complete_task(alist, clist):
             if exit_to_menu(removed):
                 return
             else:
-                removed = int(removed)
-                removed_item = alist.pop(removed)
-                clist.append(removed_item)
+                completed = int(removed)
+                completed_item = alist.pop(completed)
+                clist.append(completed_item)
                 print("\n Task removed from current tasks.")
                 view_current_tasks(alist)
+                counter = 3
                 return alist
         except ValueError:
             print("Please input a valid integar representing a Task index or exit \n")
         except IndexError:
             print("Please input a valid integar representing a Task Index or exit \n")       
 
+def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, completed list
+    global counter
+    if counter == 0:
+        print("No actions taken yet, nothing to undo")
+        return 
+    elif counter == 1:
+        print("Removing last task .....")
+        removed_item = alist.pop()
+        blist.append(removed_item)
+        return alist, blist
+    elif counter == 2:
+        print("Re-adding last removed task ....")
+        adding_item = blist.pop()
+        alist.append(adding_item)
+        return alist, blist
+    elif counter == 3:
+        print("Fetching completed task .....")
+        completed = clist.pop()
+        alist.append(completed)
+    counter = 0
+
+
 
 todo_list = reading_file("currenttasks.txt")
 completed_list = reading_file("completedtasks.txt")
+removed_tasks = []
 # print(completed_list) #testing current state of completed list
 # print(todo_list) #testing current state of todo_list
 while True: 
     welcome()
     try:
         choice = int(input("Enter number here: "))
-        if choice == 1:
+        if choice == 0:
+            undo_last_action(todo_list, removed_tasks, completed_list)
+        elif choice == 1:
             add_task(todo_list) 
+            # print(counter) #testing counter
         elif choice == 2:
             view_current_tasks(todo_list)
         elif choice == 3:
             complete_task(todo_list, completed_list)
+            # print(counter) #testing counter
         elif choice == 4:
-            remove_task(todo_list)
+            remove_task(todo_list, removed_tasks)
+            # print(counter) #testing counter
         elif choice ==5:
             view_completed_tasks(completed_list)
         elif choice == 6:
