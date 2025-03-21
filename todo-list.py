@@ -10,26 +10,14 @@ def reading_file(filename):
         alist = []
         return alist
     
-# def reading_completed_tasks_file():
-#     try:
-#         with open("completedtasks.txt", "r") as filelist:
-#             alist = []
-#             for line in filelist.readlines():
-#                 alist.append(line.strip())
-#             return alist
-#     except FileNotFoundError:
-#         alist = []
-#         return alist
 
 def writing_file(filename, alist):
     with open(filename, "w") as filelist:
         for task in alist:
             filelist.write("{}\n".format(task))
 
-# def writing_completed_tasks_file(alist):
-#     with open("completedtasks.txt", "w") as filelist:
-#         for task in alist:
-#             filelist.write("{}\n".format(task))
+
+
 
 def welcome():
     print("\nWhat would you like to do?")
@@ -41,11 +29,14 @@ def welcome():
     print("Exit? (enter: 6) \n ")
 
 def add_task(alist):
-    new_task = str(input("What task would you like to add: "))
-    alist.append(new_task)
-    index = len(alist) - 1
-    print("The task is located at the following index: {}  \n".format(index))
-    return alist
+    new_task = str(input("What task would you like to add (type \"exit\" to return to menu): "))
+    if new_task == "exit":
+        return
+    else:
+        alist.append(new_task)
+        index = len(alist) - 1
+        print("The task is located at the following index: {}  \n".format(index))
+        return alist
 
 def view_current_tasks(alist):
     print("Here are the current outstanding tasks: ")
@@ -69,15 +60,19 @@ def remove_task(alist):
         return
     while True:
         try:
-            removed = int(input("Which task would you like to remove? Please enter index number only: "))
-            alist.pop(removed)
-            print("\n Task removed from current tasks.")
-            view_current_tasks(alist)
-            return alist
+            removed = input("Which task would you like to remove? Please enter index number (type \"exit\" to return to menu): ")
+            if removed == "exit":
+                return
+            else:
+                removed = int(removed)
+                alist.pop(removed)
+                print("\n Task removed from current tasks.")
+                view_current_tasks(alist)
+                return alist
         except ValueError:
-            print("Please input a valid integar representing a Task index \n")
+            print("Please input a valid integar representing a Task index or exit \n")
         except IndexError:
-            print("Please input a valid integar representing a Task Index \n")
+            print("Please input a valid integar representing a Task Index or exit \n")
 
 def complete_task(alist, clist):
     if view_current_tasks(alist) is False:
@@ -85,16 +80,20 @@ def complete_task(alist, clist):
         return
     while True:
         try:
-            removed = int(input("Which task would you like to complete? Please enter index number only: "))
-            removed_item = alist.pop(removed)
-            clist.append(removed_item)
-            print("\n Task removed from current tasks.")
-            view_current_tasks(alist)
-            return alist
+            removed = input("Which task would you like to complete? Please enter index number (type \"exit\" to return to menu): ")
+            if removed == "exit":
+                return
+            else:
+                removed = int(removed)
+                removed_item = alist.pop(removed)
+                clist.append(removed_item)
+                print("\n Task removed from current tasks.")
+                view_current_tasks(alist)
+                return alist
         except ValueError:
-            print("Please input a valid integar representing a Task index \n")
+            print("Please input a valid integar representing a Task index or exit \n")
         except IndexError:
-            print("Please input a valid integar representing a Task Index \n")       
+            print("Please input a valid integar representing a Task Index or exit \n")       
 
 
 todo_list = reading_file("currenttasks.txt")
