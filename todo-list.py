@@ -1,6 +1,8 @@
 import csv
 counter = 0
 
+
+
 def reading_file(filename):
     try:
         with open(filename, "r") as filelist:
@@ -34,20 +36,40 @@ def welcome():
     print("Complete task? (enter: 3)")
     print("Remove Task? (enter: 4)")
     print("See completed Tasks? (enter: 5)")
-    print("Exit? (enter: 6) \n ")
+    print("Change Priority of Task? (enter: 6)")
+    print("Exit? (enter: 7) \n ")
+
+class PriorityError(Exception):
+    pass
+
+def priority_check():
+    while True:
+        try: 
+            priority = str(input("What priority level is this task (low/medium/high): ")).lower()
+            if priority not in ["high", "medium", "low"]:
+                raise PriorityError
+            else: 
+                return priority 
+        except PriorityError:
+            print("Please enter one of the following priorities: \"low\", \"medium\", or \"high\" ")
+    
 
 def add_task(alist):
     global counter
-    new_task = str(input("What task would you like to add (type \"exit\" to return to menu): "))
-    if exit_to_menu(new_task):
+    user_task = str(input("What task would you like to add (type \"exit\" to return to menu): "))
+    if exit_to_menu(user_task):
         print("returning to menu .....")
         return
     else:
+        priority = priority_check() # asking for priority of task and checking the input is valid
+        new_task = [user_task, "priority is: {}".format(priority.upper())]
         alist.append(new_task)
         index = len(alist) - 1
         print("The task is located at the following index: {}  \n".format(index))
         counter = 1
         return alist
+
+
 
 def view_current_tasks(alist):
     print("Here are the current outstanding tasks: ")
@@ -133,6 +155,13 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         alist.append(completed)
     counter = 0
 
+def change_priority(alist):
+    global counter
+    view_current_tasks(alist)
+    chosen_task_index = int(input("Which task would you like to change priority of. Please choose a valid index: "))
+    priority = priority_check() 
+    alist[chosen_task_index][1] = "priority is: {}".format(priority.upper())
+    return alist
 
 
 todo_list = reading_file("currenttasks.csv")
@@ -160,6 +189,8 @@ while True:
         elif choice ==5:
             view_completed_tasks(completed_list)
         elif choice == 6:
+            change_priority(todo_list)
+        elif choice == 7:
             print("Shutting down todo-list app \n ....")
             writing_file("currenttasks.csv", todo_list)
             writing_file("completedtasks.csv", completed_list)
