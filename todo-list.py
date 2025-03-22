@@ -5,8 +5,9 @@ def reading_file(filename):
     try:
         with open(filename, "r") as filelist:
             alist = []
-            for line in filelist.readlines():
-                alist.append(line.strip())
+            read = csv.reader(filelist)
+            for line in read:
+                alist.append(line)
             return alist
     except FileNotFoundError:
         alist = []
@@ -15,8 +16,8 @@ def reading_file(filename):
 
 def writing_file(filename, alist):
     with open(filename, "w") as filelist:
-        for task in alist:
-            filelist.write("{}\n".format(task))
+        writer = csv.writer(filelist)
+        writer.writerows(alist)
 
 
 def exit_to_menu(user_input):
@@ -134,8 +135,8 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
 
 
 
-todo_list = reading_file("currenttasks.txt")
-completed_list = reading_file("completedtasks.txt")
+todo_list = reading_file("currenttasks.csv")
+completed_list = reading_file("completedtasks.csv")
 removed_tasks = []
 # print(completed_list) #testing current state of completed list
 # print(todo_list) #testing current state of todo_list
@@ -160,8 +161,8 @@ while True:
             view_completed_tasks(completed_list)
         elif choice == 6:
             print("Shutting down todo-list app \n ....")
-            writing_file("currenttasks.txt", todo_list)
-            writing_file("completedtasks.txt", completed_list)
+            writing_file("currenttasks.csv", todo_list)
+            writing_file("completedtasks.csv", completed_list)
             # print(todo_list) #used for testing out[ut to file
             break
         else:
