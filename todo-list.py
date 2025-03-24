@@ -1,6 +1,8 @@
 import csv
 counter = 0
 
+class PriorityError(Exception):
+    pass
 
 def reading_file(filename):
     try:
@@ -14,18 +16,35 @@ def reading_file(filename):
         alist = []
         return alist
     
-
 def writing_file(filename, alist):
     with open(filename, "w") as filelist:
         writer = csv.writer(filelist)
         writer.writerows(alist)
 
-
 def exit_to_menu(user_input):
     if user_input.lower() == "exit":
+        print("Exiting to Main Menu \n ......")
         return True
 
-        
+def check_index_is_integar(input_index):
+    if not input_index.isdigit():
+        return True
+
+def check_index_in_range(alist, input_index):
+    input_index = int(input_index)
+    if input_index not in range(0, len(alist)):
+        return True
+
+def index_validator(alist, input_index):
+    if check_index_is_integar(input_index):
+        print("Please enter a integar or \"exit\" \n")
+        return False
+    index = int(input_index)
+    if check_index_in_range(alist, index):
+        print("Please input valid index in between 0 and {} :".format(len(alist)-1))
+        return False 
+    return index
+
 
 def welcome():
     print("\nWhat would you like to do?")
@@ -38,11 +57,6 @@ def welcome():
     print("Change Priority of Task? (enter: 6)")
     print("Exit? (enter: 7) \n ")
 
-class PriorityError(Exception):
-    pass
-
-
-
 def priority_choice():
     while True:
         try: 
@@ -53,7 +67,6 @@ def priority_choice():
                 return priority 
         except PriorityError:
             print("Please enter one of the following priorities: \"low\", \"medium\", or \"high\" or \"exit\" to exit to main menu:  ")
-    
 
 def add_task(alist):
     global counter
@@ -73,8 +86,6 @@ def add_task(alist):
             print("The task is located at the following index: {}  \n".format(index))
             counter = 1
             return alist
-
-
 
 def view_current_tasks(alist):
     print("Here are the current outstanding tasks: ")
@@ -148,12 +159,13 @@ def change_priority(alist):
         task_index = input("Which task would you like to change. Please choose valid index: ")
         if exit_to_menu(task_index): #checks if input was "exit"
             return
-        if not task_index.isdigit():
-            print("Please enter a integar or \"exit\" \n")
-            continue 
-        task_index = int(task_index) #once exit confirmed not the entry, can convert into int
-        if task_index not in range(0, len(alist)):
-            print("Please input valid index in between 0 and {} :".format(len(alist)-1))
+        # if check_index_is_integar(task_index):
+        #     continue 
+        # task_index = int(task_index) #once exit confirmed not the entry, can convert into int
+        # if check_index_in_range(todo_list, task_index):
+        #     continue 
+        index = index_validator(todo_list, task_index)
+        if index is False: 
             continue 
         priority = priority_choice()
         if exit_to_menu(priority):
@@ -163,6 +175,7 @@ def change_priority(alist):
             continue
         break 
     alist[task_index][1] = "priority is: {}".format(priority.upper())
+    counter = 4
     return alist 
 
 def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, completed list
