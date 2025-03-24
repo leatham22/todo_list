@@ -137,7 +137,33 @@ def complete_task(alist, clist):
         except ValueError:
             print("Please input a valid integar representing a Task index or exit \n")
         except IndexError:
-            print("Please input a valid integar representing a Task Index or \"exit\" \n")       
+            print("Please input a valid integar representing a Task Index or \"exit\" \n")      
+
+def change_priority(alist):
+    global counter
+    if view_current_tasks(alist) is False:
+        print("No Tasks to complete, returning you to menu \n ......")
+        return
+    while True: 
+        task_index = input("Which task would you like to change. Please choose valid index: ")
+        if exit_to_menu(task_index): #checks if input was "exit"
+            return
+        if not task_index.isdigit():
+            print("Please enter a integar or \"exit\" \n")
+            continue 
+        task_index = int(task_index) #once exit confirmed not the entry, can convert into int
+        if task_index not in range(0, len(alist)):
+            print("Please input valid index in between 0 and {} :".format(len(alist)-1))
+            continue 
+        priority = priority_choice()
+        if exit_to_menu(priority):
+            return
+        if priority == alist[task_index][1]:
+            print("Priority same as before. Please enter new priority or \"exit\": ")
+            continue
+        break 
+    alist[task_index][1] = "priority is: {}".format(priority.upper())
+    return alist 
 
 def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, completed list
     global counter
@@ -159,31 +185,6 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         completed = clist.pop()
         alist.append(completed)
     counter = 0
-
-def change_priority(alist):
-    global counter
-    if view_current_tasks(alist) is False:
-        print("No Tasks to complete, returning you to menu \n ......")
-        return
-    while True: 
-        task_index = input("Which task would you like to change. Please choose valid index: ")
-        if exit_to_menu(task_index):
-            return
-        task_index = int(task_index)
-        if task_index not in range(0, len(alist)):
-            print("Please input valid index in between 0 and {} :".format(len(alist)-1))
-            continue 
-        priority = priority_choice()
-        if exit_to_menu(priority):
-            return
-        if priority == alist[task_index][1]:
-            print("Priority same as before. Please enter new priority or \"exit\": ")
-            continue
-        break 
-    alist[task_index][1] = "priority is: {}".format(priority.upper())
-    return alist
-
-
 
 todo_list = reading_file("currenttasks.csv")
 completed_list = reading_file("completedtasks.csv")
