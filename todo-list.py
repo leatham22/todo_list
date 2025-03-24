@@ -2,7 +2,6 @@ import csv
 counter = 0
 
 
-
 def reading_file(filename):
     try:
         with open(filename, "r") as filelist:
@@ -45,13 +44,13 @@ class PriorityError(Exception):
 def priority_check():
     while True:
         try: 
-            priority = str(input("What priority level is this task (low/medium/high): ")).lower()
-            if priority not in ["high", "medium", "low"]:
+            priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu")).lower()
+            if priority not in ["high", "medium", "low", "exit"]:
                 raise PriorityError
             else: 
                 return priority 
         except PriorityError:
-            print("Please enter one of the following priorities: \"low\", \"medium\", or \"high\" ")
+            print("Please enter one of the following priorities: \"low\", \"medium\", or \"high\" or \"exit\" to exit to main menu")
     
 
 def add_task(alist):
@@ -62,12 +61,16 @@ def add_task(alist):
         return
     else:
         priority = priority_check() # asking for priority of task and checking the input is valid
-        new_task = [user_task, "priority is: {}".format(priority.upper())]
-        alist.append(new_task)
-        index = len(alist) - 1
-        print("The task is located at the following index: {}  \n".format(index))
-        counter = 1
-        return alist
+        if exit_to_menu(priority):
+            print("returning to menu .....")
+            return 
+        else:
+            new_task = [user_task, "priority is: {}".format(priority.upper())]
+            alist.append(new_task)
+            index = len(alist) - 1
+            print("The task is located at the following index: {}  \n".format(index))
+            counter = 1
+            return alist
 
 
 
