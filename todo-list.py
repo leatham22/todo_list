@@ -1,5 +1,5 @@
 import csv
-counter = 0
+action_history_list = []
 
 
 def reading_file(filename):
@@ -73,9 +73,9 @@ def welcome():
 
 
 def add_task(alist):
-    global counter
+    global action_history_list
+    user_task = str(input("What task would you like to add (type \"exit\" to return to menu): "))
     while True:
-        user_task = str(input("What task would you like to add (type \"exit\" to return to menu): "))
         if exit_to_menu(user_task):
             return
         priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).lower()
@@ -88,7 +88,8 @@ def add_task(alist):
     alist.append(new_task)
     index = len(alist) - 1
     print("The task is located at the following index: {}  \n".format(index))
-    counter = 1
+    action_history_list.append(["Task Added", new_task])
+    # print(action_history_list) #testing to see if appended in correct format
     return alist                    
 
 
@@ -109,7 +110,7 @@ def view_completed_tasks(alist):
             print("Task completed: {}".format(task[0]))
 
 def remove_task(alist, blist):
-    global counter
+    global action_history_list
     if view_current_tasks(alist) is False:
         print("No Tasks to return, returning you to menu \n ......")
         return
@@ -125,12 +126,12 @@ def remove_task(alist, blist):
     blist.append(removed_item)
     print("\nTask removed from current tasks. \n")
     view_current_tasks(alist)
-    counter = 2
+    action_history_list.append(["Task Removed", index, removed_item])
     return alist
 
             
 def complete_task(alist, clist):
-    global counter
+    global action_history_list
     if view_current_tasks(alist) is False:
         print("No Tasks to complete, returning you to menu \n ......")
         return
@@ -146,55 +147,72 @@ def complete_task(alist, clist):
     clist.append(completed_item)
     print("\n Task removed from current tasks.")
     view_current_tasks(alist)
-    counter = 3
+    action_history_list.append(["Task Completed", index, completed_item])
     return alist
 
 
 def change_priority(alist):
-    global counter
+    global action_history_list
     if view_current_tasks(alist) is False:
         print("No Tasks to complete, returning you to menu \n ......")
         return
     while True: 
         task_index = input("Which task would you like to change. Please choose valid index: ")
-        if exit_to_menu(task_index): #checks if input was "exit"
+        if exit_to_menu(task_index): 
             return
         index = index_validator(todo_list, task_index)
         if index is True: 
             continue 
         while True: 
-            priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).lower()
-            current_priority = alist[index][1]
-            if exit_to_menu(priority):
+            new_priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).lower()
+            old_priority = alist[index][1]
+            if exit_to_menu(new_priority):
                 return
-            if priority_validator(priority, current_priority) is False:
+            if priority_validator(new_priority, old_priority) is False:
                 continue
             break
         break 
-    alist[index][1] = "priority is: {}".format(priority.upper())
-    counter = 4
+    only_task = alist[index][0]
+    alist[index][1] = new_priority.upper()
+    action_history_list.append(["Priority Changed", index, only_task , old_priority, new_priority])
     return alist 
 
 def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, completed list
-    global counter
-    if counter == 0:
+    global action_history_list
+    if not action_history_list:
         print("No actions taken yet, nothing to undo")
         return 
-    elif counter == 1:
+    elif action_history_list[-1][0] == "Task Added":
         print("Removing last task .....")
+        action_history_list.pop()
         removed_item = alist.pop()
         blist.append(removed_item)
-        return alist, blist
-    elif counter == 2:
+        return alist
+    elif action_history_list[-1][0] == "Task Removed":
         print("Re-adding last removed task ....")
-        adding_item = blist.pop()
-        alist.append(adding_item)
+        removed_index = action_history_list[-1][1]
+        removed_task = action_history_list[-1][2]
+        alist.insert(removed_index, removed_task) #inserting task at correct index
+        blist.pop()
+        action_history_list.pop()
         return alist, blist
-    elif counter == 3:
+    elif action_history_list[-1][0] == "Task Completed":
         print("Fetching completed task .....")
-        completed = clist.pop()
-        alist.append(completed)
-    counter = 0
+        completed_index = action_history_list[-1][1]
+        completed_task = action_history_list[-1][2]
+        alist.insert(completed_index, completed_task)
+        clist.pop()
+        return alist, clist
+    elif action_history_list[-1][0] == "Priority Changed":
+        priority_index = action_history_list[-1][1]
+        task_info = action_history_list[-1][2]
+        old_priority = action_history_list[-1][3]
+        new_priority = action_history_list[-1][4]
+        alist[priority_index][1] = old_priority.upper()
+        print("\nThe Priority of Task \"{}\" (at index: {}) has been changed from {} to {}".format(task_info, priority_index, old_priority, new_priority.upper()))
+        return alist
+    action_history_list.clear()
+
 
 todo_list = reading_file("currenttasks.csv")
 completed_list = reading_file("completedtasks.csv")
@@ -209,15 +227,12 @@ while True:
             undo_last_action(todo_list, removed_tasks, completed_list)
         elif choice == 1:
             add_task(todo_list) 
-            # print(counter) #testing counter
         elif choice == 2:
             view_current_tasks(todo_list)
         elif choice == 3:
             complete_task(todo_list, completed_list)
-            # print(counter) #testing counter
         elif choice == 4:
             remove_task(todo_list, removed_tasks)
-            # print(counter) #testing counter
         elif choice ==5:
             view_completed_tasks(completed_list)
         elif choice == 6:
