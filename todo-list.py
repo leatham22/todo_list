@@ -1,8 +1,6 @@
 import csv
 counter = 0
 
-class PriorityError(Exception):
-    pass
 
 def reading_file(filename):
     try:
@@ -34,25 +32,32 @@ def check_index_in_range(alist, input_index):
     input_index = int(input_index)
     if input_index not in range(0, len(alist)):
         return True
+    
+def check_priority_is_valid(input_priority):
+    if input_priority not in ["high", "medium", "low"]:  
+        print("Please enter one of the following priorities: \"low\", \"medium\", or \"high\" or \"exit\" to exit to main menu:  ")  
+        return True
+
+def check_same_priority(input_priority, existing_priority):
+    if input_priority.upper() == existing_priority[13:]:
+        return True
 
 def index_validator(alist, input_index):
     if check_index_is_integar(input_index):
         print("Please enter a integar or \"exit\" \n")
-        return False
+        return True
     index = int(input_index)
     if check_index_in_range(alist, index):
         print("Please input valid index in between 0 and {} :".format(len(alist)-1))
-        return False 
+        return True 
     return index
 
-def priority_validator(priority, existing_priority = None):
-    if priority not in ["high", "medium", "low"]:
-        print("Please enter one of the following priorities: \"low\", \"medium\", or \"high\" or \"exit\" to exit to main menu:  ")
+def priority_validator(priority, existing_priority):
+    if check_priority_is_valid(priority):
         return False
-    if existing_priority is not None:
-        if priority.upper() == existing_priority[13:]:
-            print("This is the same priority as before .. ")
-            return False
+    if check_same_priority(priority, existing_priority):
+        print("This is the same priority as before .. ")
+        return False
 
 
 def welcome():
@@ -76,7 +81,7 @@ def add_task(alist):
         priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).lower()
         if exit_to_menu(priority):
             return
-        if priority_validator(priority) is False:
+        if check_priority_is_valid(priority):
             continue
         break 
     new_task = [user_task, "priority is: {}".format(priority.upper())]
@@ -109,46 +114,41 @@ def remove_task(alist, blist):
         print("No Tasks to return, returning you to menu \n ......")
         return
     while True:
-        try:
-            removed = input("Which task would you like to remove? Please enter index number (type \"exit\" to return to menu): ")
-            if exit_to_menu(removed):
-                return
-            else:
-                removed = int(removed)
-                removed_item = alist.pop(removed)
-                blist.append(removed_item)
-                print(blist)
-                print("\n Task removed from current tasks.")
-                view_current_tasks(alist)
-                counter = 2
-                return alist
-        except ValueError:
-            print("Please input a valid integar representing a Task index or exit \n")
-        except IndexError:
-            print("Please input a valid integar representing a Task Index or exit \n")
+        removed_index = input("Which task would you like to remove? Please enter index number (type \"exit\" to return to menu): ")
+        if exit_to_menu(removed_index):
+            return
+        index = index_validator(todo_list, removed_index)
+        if index is True:
+            continue
+        break 
+    removed_item = alist.pop(index)
+    blist.append(removed_item)
+    print("\nTask removed from current tasks. \n")
+    view_current_tasks(alist)
+    counter = 2
+    return alist
 
+            
 def complete_task(alist, clist):
     global counter
     if view_current_tasks(alist) is False:
         print("No Tasks to complete, returning you to menu \n ......")
         return
     while True:
-        try:
-            removed = input("Which task would you like to complete? Please enter index number (type \"exit\" to return to menu): ")
-            if exit_to_menu(removed):
-                return
-            else:
-                completed = int(removed)
-                completed_item = alist.pop(completed)
-                clist.append(completed_item)
-                print("\n Task removed from current tasks.")
-                view_current_tasks(alist)
-                counter = 3
-                return alist
-        except ValueError:
-            print("Please input a valid integar representing a Task index or exit \n")
-        except IndexError:
-            print("Please input a valid integar representing a Task Index or \"exit\" \n")      
+        completed_index = input("Which task would you like to complete? Please enter index number (type \"exit\" to return to menu): ")
+        if exit_to_menu(completed_index):
+            return
+        index = index_validator(todo_list, completed_index)
+        if index is True:
+            continue
+        break 
+    completed_item = alist.pop(index)
+    clist.append(completed_item)
+    print("\n Task removed from current tasks.")
+    view_current_tasks(alist)
+    counter = 3
+    return alist
+
 
 def change_priority(alist):
     global counter
@@ -160,7 +160,7 @@ def change_priority(alist):
         if exit_to_menu(task_index): #checks if input was "exit"
             return
         index = index_validator(todo_list, task_index)
-        if index is False: 
+        if index is True: 
             continue 
         while True: 
             priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).lower()
