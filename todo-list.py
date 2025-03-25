@@ -39,7 +39,7 @@ def check_priority_is_valid(input_priority):
         return True
 
 def check_same_priority(input_priority, existing_priority):
-    if input_priority.upper() == existing_priority[13:]:
+    if input_priority.upper() == existing_priority:
         return True
 
 def index_validator(alist, input_index):
@@ -84,7 +84,7 @@ def add_task(alist):
         if check_priority_is_valid(priority):
             continue
         break 
-    new_task = [user_task, "priority is: {}".format(priority.upper())]
+    new_task = [user_task, priority.upper()]
     alist.append(new_task)
     index = len(alist) - 1
     print("The task is located at the following index: {}  \n".format(index))
@@ -98,7 +98,7 @@ def view_current_tasks(alist):
         print("You have no tasks \n")
         return False
     for i, task in enumerate(alist):
-            print("Index: {}. Task: {}".format(i, task))
+            print("(Index: {}) Task: {:20} | Priority: {}".format(i, task[0], task[1]))
 
 def view_completed_tasks(alist):
     print("Here are all completed tasks: ")
@@ -106,7 +106,7 @@ def view_completed_tasks(alist):
         print("You're useless and haven't completed anytasks \n")
         return False
     for task in alist:
-            print("Task completed: {}".format(task))
+            print("Task completed: {}".format(task[0]))
 
 def remove_task(alist, blist):
     global counter
@@ -226,7 +226,7 @@ while True:
             print("Shutting down todo-list app \n ....")
             writing_file("currenttasks.csv", todo_list)
             writing_file("completedtasks.csv", completed_list)
-            # print(todo_list) #used for testing out[ut to file
+            # print(todo_list) #used for testing output to file
             break
         else:
             print("Please choose a valid number (1-7) \n")
