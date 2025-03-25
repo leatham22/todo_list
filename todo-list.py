@@ -45,6 +45,15 @@ def index_validator(alist, input_index):
         return False 
     return index
 
+def priority_validator(priority, existing_priority = None):
+    if priority not in ["high", "medium", "low"]:
+        print("Please enter one of the following priorities: \"low\", \"medium\", or \"high\" or \"exit\" to exit to main menu:  ")
+        return False
+    if existing_priority is not None:
+        if priority.upper() == existing_priority[13:]:
+            print("This is the same priority as before .. ")
+            return False
+
 
 def welcome():
     print("\nWhat would you like to do?")
@@ -57,35 +66,26 @@ def welcome():
     print("Change Priority of Task? (enter: 6)")
     print("Exit? (enter: 7) \n ")
 
-def priority_choice():
-    while True:
-        try: 
-            priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).lower()
-            if priority not in ["high", "medium", "low", "exit"]:
-                raise PriorityError
-            else: 
-                return priority 
-        except PriorityError:
-            print("Please enter one of the following priorities: \"low\", \"medium\", or \"high\" or \"exit\" to exit to main menu:  ")
 
 def add_task(alist):
     global counter
-    user_task = str(input("What task would you like to add (type \"exit\" to return to menu): "))
-    if exit_to_menu(user_task):
-        print("returning to menu .....")
-        return
-    else:
-        priority = priority_choice() # asking for priority of task and checking the input is valid
+    while True:
+        user_task = str(input("What task would you like to add (type \"exit\" to return to menu): "))
+        if exit_to_menu(user_task):
+            return
+        priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).lower()
         if exit_to_menu(priority):
-            print("returning to menu .....")
-            return 
-        else:
-            new_task = [user_task, "priority is: {}".format(priority.upper())]
-            alist.append(new_task)
-            index = len(alist) - 1
-            print("The task is located at the following index: {}  \n".format(index))
-            counter = 1
-            return alist
+            return
+        if priority_validator(priority) is False:
+            continue
+        break 
+    new_task = [user_task, "priority is: {}".format(priority.upper())]
+    alist.append(new_task)
+    index = len(alist) - 1
+    print("The task is located at the following index: {}  \n".format(index))
+    counter = 1
+    return alist                    
+
 
 def view_current_tasks(alist):
     print("Here are the current outstanding tasks: ")
@@ -159,22 +159,19 @@ def change_priority(alist):
         task_index = input("Which task would you like to change. Please choose valid index: ")
         if exit_to_menu(task_index): #checks if input was "exit"
             return
-        # if check_index_is_integar(task_index):
-        #     continue 
-        # task_index = int(task_index) #once exit confirmed not the entry, can convert into int
-        # if check_index_in_range(todo_list, task_index):
-        #     continue 
         index = index_validator(todo_list, task_index)
         if index is False: 
             continue 
-        priority = priority_choice()
-        if exit_to_menu(priority):
-            return
-        if priority == alist[task_index][1]:
-            print("Priority same as before. Please enter new priority or \"exit\": ")
-            continue
+        while True: 
+            priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).lower()
+            current_priority = alist[index][1]
+            if exit_to_menu(priority):
+                return
+            if priority_validator(priority, current_priority) is False:
+                continue
+            break
         break 
-    alist[task_index][1] = "priority is: {}".format(priority.upper())
+    alist[index][1] = "priority is: {}".format(priority.upper())
     counter = 4
     return alist 
 
@@ -232,8 +229,8 @@ while True:
             # print(todo_list) #used for testing out[ut to file
             break
         else:
-            print("Please choose a valid number (1-4) \n")
+            print("Please choose a valid number (1-7) \n")
     except ValueError:
-        print("Must be an integar between 1-4, please try again \n ")
+        print("Must be an integar between 1-7, please try again \n ")
     except IndexError:
-        print("Must be between 1-4: \n ")
+        print("Must be between 1-7: \n ")
