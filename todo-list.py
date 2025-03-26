@@ -1,7 +1,6 @@
 import csv
 import ast
-action_history_list = []
-
+from datetime import datetime
 
 
 def reading_file(filename):
@@ -92,8 +91,23 @@ def add_task(alist):
             return
         if check_priority_is_valid(priority):
             continue
+        while True: 
+            user_task_deadline_question = str(input("Would you like a deadline for the task? (type \"exit\" to return to menu): ")).strip().lower()
+            if exit_to_menu(user_task_deadline_question):
+                return 
+            if user_task_deadline_question not in ["yes", "no"]:
+                print("Please enter \"yes\" or \"no\"!")
+                continue
+            if user_task_deadline_question == "yes":
+                user_task_deadline = str(input("What deadline would you like to set?: "))
+                if exit_to_menu(user_task_deadline):
+                    return 
+            elif user_task_deadline_question == "no":
+                user_task_deadline = "No Deadline"
+            break
         break 
-    new_task = [[user_task_title, user_task_description], priority.upper()]
+    now = str(datetime.now())
+    new_task = [[user_task_title, user_task_description], priority.upper(), [now, user_task_deadline]]
     alist.append(new_task)
     index = len(alist) - 1
     print("\nYour new task is located at the following index: {}  \n".format(index))
@@ -230,6 +244,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
 todo_list = reading_file("currenttasks.csv")
 completed_list = reading_file("completedtasks.csv")
 removed_tasks = []
+action_history_list = []
 # print(completed_list) #testing current state of completed list
 # print(todo_list) #testing current state of todo_list
 while True: 
