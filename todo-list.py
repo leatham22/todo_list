@@ -74,7 +74,8 @@ def welcome():
     print("Change Priority of Task? (enter: 6)")
     print("Change Task description? (enter: 7)")
     print("Change Task Title? (enter: 8)")
-    print("Exit? (enter: 9) \n ")
+    print("View Action History? (enter: 9)")
+    print("Exit? (enter: 10) \n ")
 
 
 def add_task(alist):
@@ -92,7 +93,7 @@ def add_task(alist):
         if check_priority_is_valid(priority):
             continue
         while True: 
-            user_task_deadline_question = str(input("Would you like a deadline for the task? (type \"exit\" to return to menu): ")).strip().lower()
+            user_task_deadline_question = str(input("Would you like a deadline for the task (\"yes\" or \"no\")? (type \"exit\" to return to menu): ")).strip().lower()
             if exit_to_menu(user_task_deadline_question):
                 return 
             if user_task_deadline_question not in ["yes", "no"]:
@@ -157,6 +158,25 @@ def view_completed_tasks(alist):
         return False
     for task in alist:
             print("Task completed: {}".format(task[0][0]))
+
+def view_action_history():
+    global action_history_list
+    if not action_history_list:
+        print("\nNothing in action history")
+    print("Below are actions from earliest to latest:")
+    for action in action_history_list:
+        if action[0] == "Task Added":
+            print("Added Task : {}".format(action[1][0][0]))
+        elif action[0] == "Task Removed":
+            print("Removed Task: \"{}\" from index \"{}\"".format(action[2][0][0], action[1]))
+        elif action[0] == "Task Completed":
+            print("Completed task \"{}\"".format(action[2][0][0]))
+        elif action[0] == "Priority Changed":
+            print("Priority in Task \"{}\" changed from {} to {} ".format(action[2], action[3], action[4]))
+        elif action[0] == "Task Description Changed":
+            print("Description for Task \"{}\" changed from {} to {}".format(action[2], action[3], action[4]))
+        elif action[0] == "Task Title Changed":
+            print("Task Title at index \"{}\" changed from {} to {}".format(action[1], action[2], action[3]))
 
 def remove_task(alist, blist):
     global action_history_list
@@ -264,10 +284,10 @@ def change_priority(alist):
                 continue
             break
         break 
-    only_task = alist[index][0]
+    only_task_title = alist[index][0][0]
     alist[index][1] = new_priority.upper()
-    print("Priority of task \"{}\" has been changed from {} to {} \n".format(only_task[0], old_priority, new_priority))
-    action_history_list.append(["Priority Changed", index, only_task , old_priority, new_priority])
+    print("Priority of task \"{}\" has been changed from {} to {} \n".format(only_task_title, old_priority, new_priority.upper()))
+    action_history_list.append(["Priority Changed", index, only_task_title , old_priority, new_priority])
     return alist 
 
 def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, completed list
@@ -306,7 +326,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         new_priority = action_history_list[-1][4]
         alist[priority_index][1] = old_priority.upper()
         action_history_list.clear()
-        print("\nThe Priority of Task \"{}\" (at index: {}) has been changed back from {} to {}".format(task_info[0], priority_index, new_priority.upper(), old_priority))
+        print("\nThe Priority of Task \"{}\" (at index: {}) has been changed back from {} to {}".format(task_info, priority_index, new_priority.upper(), old_priority))
         return alist
     elif action_history_list[-1][0] == "Task Description Changed":
         changed_desc_index = action_history_list[-1][1]
@@ -357,6 +377,8 @@ while True:
         elif choice == 8:
             change_task_title(todo_list)
         elif choice == 9:
+            view_action_history()
+        elif choice == 10:
             print("Shutting down todo-list app \n ....")
             writing_file("currenttasks.csv", todo_list)
             writing_file("completedtasks.csv", completed_list)
