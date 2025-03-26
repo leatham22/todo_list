@@ -67,7 +67,7 @@ def welcome():
     print("\n\033[1mWhat would you like to do?\033[0m")
     print("Undo last action? (enter: 0)")
     print("Add Task? (enter: 1)")
-    print("View Tasks? (enter: 2)")
+    print("View Tasks details? (enter: 2)")
     print("Complete task? (enter: 3)")
     print("Remove Task? (enter: 4)")
     print("See completed Tasks? (enter: 5)")
@@ -116,13 +116,41 @@ def add_task(alist):
     return alist                    
 
 
-def view_current_tasks(alist):
+def view_current_base_tasks(alist):
     print("\nHere are the current outstanding tasks: ")
     if not alist:
         print("You have no tasks \n")
         return False
     for i, task in enumerate(alist):
-            print("(Index: {}) Task: {:20} | Priority: {}".format(i, task[0][0], task[1]))
+            print("(Index: {}) Task: {:15} | Priority: {:6} | Deadline: {}".format(i, task[0][0], task[1], task[2][1]))
+
+def view_task_descriptions(alist):
+    if view_current_base_tasks(alist) is False:
+        print("No Tasks ...")
+        return
+    while True:
+        user_task_description_index = input("Which Task details would you like to see? Please choose a valid index: ").strip()
+        if exit_to_menu(user_task_description_index):
+            return
+        index = index_validator(todo_list, user_task_description_index)
+        if index is True:
+            continue
+        print("Task: \"{}\" has description: {} | Task was created on: {} \n".format(alist[index][0][0], alist[index][0][1], alist[index][2][0]))
+        while True:
+            user_go_again = str(input("Would you like to view another Task description? (Answer \"yes\" or \"no\"): ")).strip().lower()
+            if exit_to_menu(user_go_again):
+                return
+            if user_go_again not in ["yes", "no"]:
+                print("Please choose answer \"yes\" or \"no\"!\n")
+                continue
+            break
+        if user_go_again == "yes":
+            continue
+        elif user_go_again == "no":
+            return
+        break 
+
+
 
 def view_completed_tasks(alist):
     print("Here are all completed tasks: ")
@@ -134,7 +162,7 @@ def view_completed_tasks(alist):
 
 def remove_task(alist, blist):
     global action_history_list
-    if view_current_tasks(alist) is False:
+    if view_current_base_tasks(alist) is False:
         print("No Tasks to return, returning you to menu \n ......")
         return
     while True:
@@ -148,14 +176,14 @@ def remove_task(alist, blist):
     removed_item = alist.pop(index)
     blist.append(removed_item)
     print("\nTask: \"{}\" has been removed from current tasks. \n".format(removed_item[0][0]))
-    view_current_tasks(alist)
+    view_current_base_tasks(alist)
     action_history_list.append(["Task Removed", index, removed_item])
     return alist
 
             
 def complete_task(alist, clist):
     global action_history_list
-    if view_current_tasks(alist) is False:
+    if view_current_base_tasks(alist) is False:
         print("No Tasks to complete, returning you to menu \n ......")
         return
     while True:
@@ -169,14 +197,14 @@ def complete_task(alist, clist):
     completed_item = alist.pop(index)
     clist.append(completed_item)
     print("\n Task \"{}\" has been removed from current tasks. \n".format(completed_item[0][0]))
-    view_current_tasks(alist)
+    view_current_base_tasks(alist)
     action_history_list.append(["Task Completed", index, completed_item])
     return alist
 
 
 def change_priority(alist):
     global action_history_list
-    if view_current_tasks(alist) is False:
+    if view_current_base_tasks(alist) is False:
         print("No Tasks to complete, returning you to menu \n ......")
         return
     while True: 
@@ -256,7 +284,7 @@ while True:
         elif choice == 1:
             add_task(todo_list) 
         elif choice == 2:
-            view_current_tasks(todo_list)
+            view_task_descriptions(todo_list)
         elif choice == 3:
             complete_task(todo_list, completed_list)
         elif choice == 4:
