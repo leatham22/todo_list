@@ -78,14 +78,12 @@ def welcome():
 def add_task(alist):
     global action_history_list
     user_task_title = str(input("What is the title of your task (type \"exit\" to return to menu): ")).strip().title()
+    if exit_to_menu(user_task_title):
+        return
+    user_task_description = str(input("Please enter task description (type \"exit\" to return to menu): ")).strip()
+    if exit_to_menu(user_task_description):
+        return 
     while True:
-        if exit_to_menu(user_task_title):
-            return
-        while True: 
-            user_task_description = str(input("Please enter task description (type \"exit\" to return to menu): ")).strip()
-            if exit_to_menu(user_task_description):
-                return 
-            break
         priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).strip().lower()
         if exit_to_menu(priority):
             return
@@ -105,7 +103,7 @@ def add_task(alist):
             elif user_task_deadline_question == "no":
                 user_task_deadline = "No Deadline"
             break
-        break 
+        break
     now = str(datetime.now())
     new_task = [[user_task_title, user_task_description], priority.upper(), [now, user_task_deadline]]
     alist.append(new_task)
@@ -149,8 +147,6 @@ def view_task_descriptions(alist):
         elif user_go_again == "no":
             return
         break 
-
-
 
 def view_completed_tasks(alist):
     print("Here are all completed tasks: ")
