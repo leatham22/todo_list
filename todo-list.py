@@ -1,5 +1,5 @@
 import csv
-
+import ast
 action_history_list = []
 
 
@@ -9,8 +9,9 @@ def reading_file(filename):
         with open(filename, "r") as filelist:
             alist = []
             read = csv.reader(filelist)
-            for line in read:
-                alist.append(line)
+            for row in read:
+                task = ast.literal_eval(row[0])
+                alist.append(task)
             return alist
     except FileNotFoundError:
         alist = []
@@ -19,7 +20,8 @@ def reading_file(filename):
 def writing_file(filename, alist):
     with open(filename, "w") as filelist:
         writer = csv.writer(filelist)
-        writer.writerows(alist)
+        for task in alist:
+            writer.writerow([str(task)])
 
 def exit_to_menu(user_input):
     if user_input.lower() == "exit":
@@ -76,17 +78,22 @@ def welcome():
 
 def add_task(alist):
     global action_history_list
-    user_task = str(input("What task would you like to add (type \"exit\" to return to menu): ")).strip()
+    user_task_title = str(input("What is the title of your task (type \"exit\" to return to menu): ")).strip().title()
     while True:
-        if exit_to_menu(user_task):
+        if exit_to_menu(user_task_title):
             return
+        while True: 
+            user_task_description = str(input("Please enter task description (type \"exit\" to return to menu): ")).strip()
+            if exit_to_menu(user_task_description):
+                return 
+            break
         priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).strip().lower()
         if exit_to_menu(priority):
             return
         if check_priority_is_valid(priority):
             continue
         break 
-    new_task = [user_task, priority.upper()]
+    new_task = [[user_task_title, user_task_description], priority.upper()]
     alist.append(new_task)
     index = len(alist) - 1
     print("\nYour new task is located at the following index: {}  \n".format(index))
@@ -101,7 +108,7 @@ def view_current_tasks(alist):
         print("You have no tasks \n")
         return False
     for i, task in enumerate(alist):
-            print("(Index: {}) Task: {:20} | Priority: {}".format(i, task[0], task[1]))
+            print("(Index: {}) Task: {:20} | Priority: {}".format(i, task[0][0], task[1]))
 
 def view_completed_tasks(alist):
     print("Here are all completed tasks: ")
@@ -109,7 +116,7 @@ def view_completed_tasks(alist):
         print("You're useless and haven't completed anytasks \n")
         return False
     for task in alist:
-            print("Task completed: {}".format(task[0]))
+            print("Task completed: {}".format(task[0][0]))
 
 def remove_task(alist, blist):
     global action_history_list
@@ -126,7 +133,7 @@ def remove_task(alist, blist):
         break 
     removed_item = alist.pop(index)
     blist.append(removed_item)
-    print("\nTask: \"{}\" has removed from current tasks. \n".format(removed_item[0]))
+    print("\nTask: \"{}\" has been removed from current tasks. \n".format(removed_item[0][0]))
     view_current_tasks(alist)
     action_history_list.append(["Task Removed", index, removed_item])
     return alist
@@ -147,7 +154,7 @@ def complete_task(alist, clist):
         break 
     completed_item = alist.pop(index)
     clist.append(completed_item)
-    print("\n Task removed from current tasks.")
+    print("\n Task \"{}\" has been removed from current tasks. \n".format(completed_item[0][0]))
     view_current_tasks(alist)
     action_history_list.append(["Task Completed", index, completed_item])
     return alist
@@ -176,6 +183,7 @@ def change_priority(alist):
         break 
     only_task = alist[index][0]
     alist[index][1] = new_priority.upper()
+    print("Priority of task \"{}\" has been changed from {} to {} \n".format(only_task[0], old_priority, new_priority))
     action_history_list.append(["Priority Changed", index, only_task , old_priority, new_priority])
     return alist 
 
@@ -190,7 +198,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         removed_item = alist.pop()
         blist.append(removed_item)
         action_history_list.clear()
-        print("Removing the folowing Task: {}".format(removed_item[0]))
+        print("Removing the folowing Task: {}".format(removed_item[0][0]))
         return alist
     elif action_history_list[-1][0] == "Task Removed":
         removed_index = action_history_list[-1][1]
@@ -198,7 +206,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         alist.insert(removed_index, removed_task) #inserting task at correct index
         blist.pop()
         action_history_list.clear()
-        print("\nTask: \"{}\" readded to todo_list at index: {}".format(removed_task[0], removed_index))
+        print("\nTask: \"{}\" readded to todo_list at index: {}".format(removed_task[0][0], removed_index))
         return alist, blist
     elif action_history_list[-1][0] == "Task Completed":
         completed_index = action_history_list[-1][1]
@@ -206,7 +214,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         alist.insert(completed_index, completed_task)
         clist.pop()
         action_history_list.clear()
-        print("\nTask: \"{}\" readded to todo_list at index: {}".format(completed_task[0], completed_index))
+        print("\nTask: \"{}\" readded to todo_list at index: {}".format(completed_task[0][0], completed_index))
         return alist, clist
     elif action_history_list[-1][0] == "Priority Changed":
         priority_index = action_history_list[-1][1]
@@ -215,7 +223,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         new_priority = action_history_list[-1][4]
         alist[priority_index][1] = old_priority.upper()
         action_history_list.clear()
-        print("\nThe Priority of Task \"{}\" (at index: {}) has been changed from {} to {}".format(task_info, priority_index, old_priority, new_priority.upper()))
+        print("\nThe Priority of Task \"{}\" (at index: {}) has been changed from {} to {}".format(task_info[0], priority_index, new_priority.upper(), old_priority))
         return alist
 
 
@@ -227,7 +235,7 @@ removed_tasks = []
 while True: 
     welcome()
     try:
-        choice = int(input("Enter number here:"))
+        choice = int(input("Enter number here:  "))
         if choice == 0:
             undo_last_action(todo_list, removed_tasks, completed_list)
         elif choice == 1:
