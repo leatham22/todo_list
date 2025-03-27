@@ -62,6 +62,26 @@ def priority_validator(priority, existing_priority):
         print("This is the same priority as before .. ")
         return False
 
+def latest_action_taken():
+    global action_history_list
+    action = action_history_list[-1][0]
+    return action
+
+def task_title(the_list, task_index):
+    task_title = the_list[task_index][0][0]
+    return task_title
+
+def task_description(the_list, task_index):
+    task_description = the_list[task_index][0][1]
+    return task_description
+
+def time_created(the_list, task_index):
+    task_creation_time = the_list[task_index][2][0]
+    return task_creation_time
+
+def current_priority(the_list, task_index):
+    task_priority = the_list[task_index][1]
+    return task_priority
 
 def welcome():
     print("\n\033[1mWhat would you like to do?\033[0m")
@@ -76,6 +96,27 @@ def welcome():
     print("Change Task Title? (enter: 8)")
     print("View Action History? (enter: 9)")
     print("Exit? (enter: 10) \n ")
+
+# def choose_action():
+#     print("\033[1mWhat Action Would You Like To Take?\033[0m")
+#     print("Add Task?         (enter: 1)")   
+#     print("Complete task?    (enter: 2)")
+#     print("Remove Task?      (enter: 3)")
+#     print("Undo last Action? (enter: 4)")
+#     chosen_action = input("Enter Number Here: ")
+#     if exit_to_menu(chosen_action):
+#         return 
+#     chosen_action = int(chosen_action)
+#     if chosen_action == 1:
+#         add_task(todo_list)
+#     elif chosen_action == 2:
+#         complete_task(todo_list, completed_list)
+#     elif chosen_action == 3:
+#         remove_task(todo_list, removed_tasks_list)
+#     elif chosen_action == 4:
+#         undo_last_action(todo_list, removed_tasks_list, completed_list)
+#     else: 
+#         print("Please choose valid number between 1 - 4")
 
 
 def add_task(alist):
@@ -123,7 +164,7 @@ def view_current_base_tasks(alist):
         print("You have no tasks \n")
         return False
     for i, task in enumerate(alist):
-            print("(Index: {}) Task: {:15} | Priority: {:6} | Deadline: {}".format(i, task[0][0], task[1], task[2][1]))
+            print("(Index: {}) Task: {:15} | Priority: {:6} | Deadline: {}".format(i, task_title(alist, i), current_priority(alist, i), task[2][1]))
 
 def view_task_descriptions(alist):
     if view_current_base_tasks(alist) is False:
@@ -136,7 +177,7 @@ def view_task_descriptions(alist):
         index = index_validator(todo_list, user_task_description_index)
         if index is True:
             continue
-        print("Task: \"{}\" has description: {} | Task was created on: {} \n".format(alist[index][0][0], alist[index][0][1], alist[index][2][0]))
+        print("Task: \"{}\" has description: {} | Task was created on: {} \n".format(task_title(alist, index), task_description(alist, index), time_created(alist, index)))
         while True:
             user_go_again = str(input("Would you like to view another Task description? (Answer \"yes\" or \"no\"): ")).strip().lower()
             if exit_to_menu(user_go_again):
@@ -232,14 +273,14 @@ def change_task_description(alist):
         if index is True:
             continue
         break 
-    print("\nThe current description of this task is: \"{}\"".format(alist[index][0][1]))
+    print("\nThe current description of this task is: \"{}\"".format(task_description(alist, index)))
     new_task_description = str(input("What would you like the new Description to be?: ")).strip()
     if exit_to_menu(new_task_description):
         return 
-    old_task_desc = alist[index][0][1]
+    old_task_desc = task_description(alist, index)
     alist[index][0][1] = new_task_description
-    action_history_list.append(["Task Description Changed", index, alist[index][0][0], old_task_desc, new_task_description])
-    print("Description changed for task: {}   |   from {} to {}".format(alist[index][0][0], old_task_desc, new_task_description))
+    action_history_list.append(["Task Description Changed", index, task_title(alist, index), old_task_desc, new_task_description])
+    print("Description changed for task: {}   |   from {} to {}".format(task_title(alist, index), old_task_desc, new_task_description))
     return alist
 
 def change_task_title(alist):
@@ -258,7 +299,7 @@ def change_task_title(alist):
     new_task_title = str(input("What would you like the new Title to be?: ")).title()
     if exit_to_menu(new_task_title):
         return
-    old_task_title = alist[index][0][0]
+    old_task_title = task_title(alist, index)
     alist[index][0][0] = new_task_title
     action_history_list.append(["Task Title Changed", index, old_task_title, new_task_title])
     print("Title of Task at index {} changed from {} to {}".format(index, old_task_title, new_task_title))
@@ -277,14 +318,14 @@ def change_priority(alist):
             continue 
         while True: 
             new_priority = str(input("What priority level is this task (low/medium/high)? Type \"exit\" to return to menu:  ")).strip().lower()
-            old_priority = alist[index][1]
+            old_priority = current_priority(alist, index)
             if exit_to_menu(new_priority):
                 return
             if priority_validator(new_priority, old_priority) is False:
                 continue
             break
         break 
-    only_task_title = alist[index][0][0]
+    only_task_title = task_title(alist, index)
     alist[index][1] = new_priority.upper()
     print("Priority of task \"{}\" has been changed from {} to {} \n".format(only_task_title, old_priority, new_priority.upper()))
     action_history_list.append(["Priority Changed", index, only_task_title , old_priority, new_priority])
@@ -295,7 +336,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
     if not action_history_list:
         print("No actions taken yet, nothing to undo")
         return 
-    elif action_history_list[-1][0] == "Task Added":
+    elif latest_action_taken() == "Task Added":
         print("Removing last task .....")
         action_history_list.pop()
         removed_item = alist.pop()
@@ -303,7 +344,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         action_history_list.clear()
         print("Removing the folowing Task: {}".format(removed_item[0][0]))
         return alist
-    elif action_history_list[-1][0] == "Task Removed":
+    elif latest_action_taken() == "Task Removed":
         removed_index = action_history_list[-1][1]
         removed_task = action_history_list[-1][2]
         alist.insert(removed_index, removed_task) #inserting task at correct index
@@ -311,7 +352,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         action_history_list.clear()
         print("\nTask: \"{}\" readded to todo_list at index: {}".format(removed_task[0][0], removed_index))
         return alist, blist
-    elif action_history_list[-1][0] == "Task Completed":
+    elif latest_action_taken() == "Task Completed":
         completed_index = action_history_list[-1][1]
         completed_task = action_history_list[-1][2]
         alist.insert(completed_index, completed_task)
@@ -319,7 +360,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         action_history_list.clear()
         print("\nTask: \"{}\" readded to todo_list at index: {}".format(completed_task[0][0], completed_index))
         return alist, clist
-    elif action_history_list[-1][0] == "Priority Changed":
+    elif latest_action_taken() == "Priority Changed":
         priority_index = action_history_list[-1][1]
         task_info = action_history_list[-1][2]
         old_priority = action_history_list[-1][3]
@@ -328,7 +369,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         action_history_list.clear()
         print("\nThe Priority of Task \"{}\" (at index: {}) has been changed back from {} to {}".format(task_info, priority_index, new_priority.upper(), old_priority))
         return alist
-    elif action_history_list[-1][0] == "Task Description Changed":
+    elif latest_action_taken() == "Task Description Changed":
         changed_desc_index = action_history_list[-1][1]
         task_title = action_history_list[-1][2]
         old_task_desc = action_history_list[-1][3]
@@ -337,7 +378,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         action_history_list.clear()
         print("\nDescription for Task \"{}\" (at index: {}) has been changed back from {} to {}".format(task_title, changed_desc_index, new_task_desc, old_task_desc))
         return alist
-    elif action_history_list[-1][0] == "Task Title Changed":
+    elif latest_action_taken() == "Task Title Changed":
         changed_title_index = action_history_list[-1][1]
         old_task_title = action_history_list[-1][2]
         new_task_title = action_history_list[-1][3]
@@ -350,7 +391,7 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
 
 todo_list = reading_file("currenttasks.csv")
 completed_list = reading_file("completedtasks.csv")
-removed_tasks = []
+removed_tasks_list = []
 action_history_list = []
 # print(completed_list) #testing current state of completed list
 # print(todo_list) #testing current state of todo_list
@@ -359,7 +400,7 @@ while True:
     try:
         choice = int(input("Enter number here:  "))
         if choice == 0:
-            undo_last_action(todo_list, removed_tasks, completed_list)
+            undo_last_action(todo_list, removed_tasks_list, completed_list)
         elif choice == 1:
             add_task(todo_list) 
         elif choice == 2:
@@ -367,7 +408,7 @@ while True:
         elif choice == 3:
             complete_task(todo_list, completed_list)
         elif choice == 4:
-            remove_task(todo_list, removed_tasks)
+            remove_task(todo_list, removed_tasks_list)
         elif choice ==5:
             view_completed_tasks(completed_list)
         elif choice == 6:
