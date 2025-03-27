@@ -64,7 +64,7 @@ def priority_validator(priority, existing_priority):
 
 def latest_action_taken():
     global action_history_list
-    action = action_history_list[-1][0]
+    action = action_history_list[-1]["action"]
     return action
 
 def task_title(the_list, task_index):
@@ -153,7 +153,11 @@ def add_task(alist):
     alist.append(new_task)
     index = len(alist) - 1
     print("\nYour new task is located at the following index: {}  \n".format(index))
-    action_history_list.append(["Task Added", new_task])
+    action_history_list.append({
+        "action" : "Task Added",
+        "index" : index,
+        "task title" : user_task_title
+        })
     # print(action_history_list) #testing to see if appended in correct format
     return alist                    
 
@@ -206,18 +210,18 @@ def view_action_history():
         print("\nNothing in action history")
     print("Below are actions from earliest to latest:")
     for action in action_history_list:
-        if action[0] == "Task Added":
-            print("Added Task : {}".format(action[1][0][0]))
-        elif action[0] == "Task Removed":
-            print("Removed Task: \"{}\" from index \"{}\"".format(action[2][0][0], action[1]))
-        elif action[0] == "Task Completed":
-            print("Completed task \"{}\"".format(action[2][0][0]))
-        elif action[0] == "Priority Changed":
-            print("Priority in Task \"{}\" changed from {} to {} ".format(action[2], action[3], action[4]))
-        elif action[0] == "Task Description Changed":
-            print("Description for Task \"{}\" changed from {} to {}".format(action[2], action[3], action[4]))
-        elif action[0] == "Task Title Changed":
-            print("Task Title at index \"{}\" changed from {} to {}".format(action[1], action[2], action[3]))
+        if action["action"] == "Task Added":
+            print("Added Task : {}".format(action["task title"]))
+        elif action["action"] == "Task Removed":
+            print("Removed Task: \"{}\" from index \"{}\"".format(action["task title"], action["index"]))
+        elif action["action"] == "Task Completed":
+            print("Completed task \"{}\"".format(action["task title"]))
+        elif action["action"] == "Priority Changed":
+            print("Priority in Task \"{}\" changed from {} to {} ".format(action["task title"], action["old priority"], action["new priority"]))
+        elif action["action"] == "Task Description Changed":
+            print("Description for Task \"{}\" changed from {} to {}".format(action["task title"], action["old task description"], action["new task description"]))
+        elif action["action"] == "Task Title Changed":
+            print("Task Title at index \"{}\" changed from {} to {}".format(action["index"], action["old task title"], action["new task title"]))
 
 def remove_task(alist, blist):
     global action_history_list
@@ -236,7 +240,12 @@ def remove_task(alist, blist):
     blist.append(removed_item)
     print("\nTask: \"{}\" has been removed from current tasks. \n".format(removed_item[0][0]))
     view_current_base_tasks(alist)
-    action_history_list.append(["Task Removed", index, removed_item])
+    action_history_list.append({
+        "action" : "Task Removed",
+        "index" : index,
+        "task title": removed_item[0][0],
+        "full task info" : removed_item
+        })
     return alist
 
             
@@ -257,7 +266,12 @@ def complete_task(alist, clist):
     clist.append(completed_item)
     print("\n Task \"{}\" has been removed from current tasks. \n".format(completed_item[0][0]))
     view_current_base_tasks(alist)
-    action_history_list.append(["Task Completed", index, completed_item])
+    action_history_list.append({
+        "action" : "Task Completed", 
+        "index" : index,
+        "task info" : completed_item[0][0],
+        "full task info" : completed_item
+        })
     return alist
 
 def change_task_description(alist):
@@ -277,10 +291,16 @@ def change_task_description(alist):
     new_task_description = str(input("What would you like the new Description to be?: ")).strip()
     if exit_to_menu(new_task_description):
         return 
-    old_task_desc = task_description(alist, index)
+    old_task_description = task_description(alist, index)
     alist[index][0][1] = new_task_description
-    action_history_list.append(["Task Description Changed", index, task_title(alist, index), old_task_desc, new_task_description])
-    print("Description changed for task: {}   |   from {} to {}".format(task_title(alist, index), old_task_desc, new_task_description))
+    action_history_list.append({
+        "action" : "Task Description Changed", 
+        "index" : index,
+        "task title"  : task_title(alist, index), 
+        "old task description" : old_task_description, 
+        "new task description" : new_task_description
+        })
+    print("Description changed for task: {}   |   from {} to {}".format(task_title(alist, index), old_task_description, new_task_description))
     return alist
 
 def change_task_title(alist):
@@ -301,7 +321,12 @@ def change_task_title(alist):
         return
     old_task_title = task_title(alist, index)
     alist[index][0][0] = new_task_title
-    action_history_list.append(["Task Title Changed", index, old_task_title, new_task_title])
+    action_history_list.append({
+        "action" : "Task Title Changed", 
+        "index" : index, 
+        "old task title" : old_task_title, 
+        "new task title" : new_task_title
+        })
     print("Title of Task at index {} changed from {} to {}".format(index, old_task_title, new_task_title))
         
 def change_priority(alist):
@@ -325,10 +350,16 @@ def change_priority(alist):
                 continue
             break
         break 
-    only_task_title = task_title(alist, index)
+    task_title = task_title(alist, index)
     alist[index][1] = new_priority.upper()
-    print("Priority of task \"{}\" has been changed from {} to {} \n".format(only_task_title, old_priority, new_priority.upper()))
-    action_history_list.append(["Priority Changed", index, only_task_title , old_priority, new_priority])
+    print("Priority of task \"{}\" has been changed from {} to {} \n".format(task_title, old_priority, new_priority.upper()))
+    action_history_list.append({
+        "action" : "Priority Changed", 
+        "index" : index, 
+        "task title" : task_title , 
+        "old priority" : old_priority,
+        "new priority" : new_priority
+        })
     return alist 
 
 def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, completed list
@@ -345,43 +376,48 @@ def undo_last_action(alist, blist, clist): #todo_list, removed_tasks list, compl
         print("Removing the folowing Task: {}".format(removed_item[0][0]))
         return alist
     elif latest_action_taken() == "Task Removed":
-        removed_index = action_history_list[-1][1]
-        removed_task = action_history_list[-1][2]
+        task_removed_dict = action_history_list[-1]
+        removed_index = task_removed_dict["index"]
+        removed_task = task_removed_dict["full task info"]
         alist.insert(removed_index, removed_task) #inserting task at correct index
         blist.pop()
         action_history_list.clear()
         print("\nTask: \"{}\" readded to todo_list at index: {}".format(removed_task[0][0], removed_index))
         return alist, blist
     elif latest_action_taken() == "Task Completed":
-        completed_index = action_history_list[-1][1]
-        completed_task = action_history_list[-1][2]
+        task_completed_dict = action_history_list[-1]
+        completed_index = task_completed_dict["index"]
+        completed_task = task_completed_dict["full task info"]
         alist.insert(completed_index, completed_task)
         clist.pop()
         action_history_list.clear()
         print("\nTask: \"{}\" readded to todo_list at index: {}".format(completed_task[0][0], completed_index))
         return alist, clist
     elif latest_action_taken() == "Priority Changed":
-        priority_index = action_history_list[-1][1]
-        task_info = action_history_list[-1][2]
-        old_priority = action_history_list[-1][3]
-        new_priority = action_history_list[-1][4]
+        priority_changed_dict = action_history_list[-1]
+        priority_index = priority_changed_dict["index"]
+        task_title = priority_changed_dict["task title"]
+        old_priority = priority_changed_dict["old priority"]
+        new_priority = priority_changed_dict["new priority"]
         alist[priority_index][1] = old_priority.upper()
         action_history_list.clear()
-        print("\nThe Priority of Task \"{}\" (at index: {}) has been changed back from {} to {}".format(task_info, priority_index, new_priority.upper(), old_priority))
+        print("\nThe Priority of Task \"{}\" (at index: {}) has been changed back from {} to {}".format(task_title, priority_index, new_priority.upper(), old_priority))
         return alist
     elif latest_action_taken() == "Task Description Changed":
-        changed_desc_index = action_history_list[-1][1]
-        task_title = action_history_list[-1][2]
-        old_task_desc = action_history_list[-1][3]
-        new_task_desc = action_history_list[-1][4]
+        description_changed_dict = action_history_list[-1]
+        changed_desc_index = description_changed_dict["index"]
+        task_title = description_changed_dict["task title"]
+        old_task_desc = description_changed_dict["old task description"]
+        new_task_desc = description_changed_dict["new task description"]
         alist[changed_desc_index][0][1] = old_task_desc
         action_history_list.clear()
         print("\nDescription for Task \"{}\" (at index: {}) has been changed back from {} to {}".format(task_title, changed_desc_index, new_task_desc, old_task_desc))
         return alist
     elif latest_action_taken() == "Task Title Changed":
-        changed_title_index = action_history_list[-1][1]
-        old_task_title = action_history_list[-1][2]
-        new_task_title = action_history_list[-1][3]
+        title_changed_dict = action_history_list[-1]
+        changed_title_index = title_changed_dict["index"]
+        old_task_title = title_changed_dict["old task title"]
+        new_task_title = title_changed_dict["new task title"]
         alist[changed_title_index][0][0] = old_task_title
         action_history_list.clear()
         print("Title for task at index {} changed back from {} to {}".format(changed_title_index, new_task_title, old_task_title))
